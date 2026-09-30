@@ -1,1 +1,367 @@
 
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PDF Library</title>
+<style>
+  :root {
+    --white: #FFFFFF;
+    --blue: #1447E6;
+    --black: #000000;
+    --bg: var(--white);
+    --text: var(--black);
+    --card: #F2F5FF;
+    --line: #D6DEFA;
+    --muted: #4A5372;
+    --accent: var(--blue);
+    --accent-text: var(--white);
+    --danger: #C2260C;
+  }
+  html[data-theme="dark"] {
+    --bg: var(--black);
+    --text: var(--white);
+    --card: #0B1230;
+    --line: #1E2C66;
+    --muted: #A9B4E0;
+    --accent: #3F6BFF;
+    --accent-text: var(--white);
+    --danger: #FF6B52;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: "Trebuchet MS", "Segoe UI", Tahoma, sans-serif;
+    line-height: 1.5; transition: background .25s, color .25s;
+  }
+  header {
+    position: sticky; top: 0; z-index: 10;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 10px 16px; background: var(--bg); border-bottom: 2px solid var(--accent);
+  }
+  header h1 { font-size: 1.05rem; margin: 0; font-weight: 700; letter-spacing: .2px; }
+  button, .btn {
+    font: inherit; cursor: pointer; border: 2px solid var(--accent); background: var(--accent);
+    color: var(--accent-text); padding: 9px 16px; border-radius: 8px; font-weight: 600;
+    text-decoration: none; display: inline-block; transition: transform .1s, opacity .2s;
+  }
+  button:hover, .btn:hover { opacity: .88; }
+  button:active, .btn:active { transform: scale(.97); }
+  button:focus-visible, .btn:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  button.ghost { background: transparent; color: var(--text); }
+  button.danger { background: transparent; border-color: var(--danger); color: var(--danger); }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  #themeBtn { width: 44px; height: 44px; padding: 0; font-size: 1.2rem; border-radius: 50%; }
+
+  .hero {
+    width: 100%; aspect-ratio: 16 / 7; max-height: 420px; background: var(--card);
+    display: flex; align-items: center; justify-content: center; overflow: hidden;
+  }
+  .hero img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .hero span { color: var(--muted); }
+
+  main { max-width: 860px; margin: 0 auto; padding: 24px 16px 60px; }
+  h2 { font-size: 1.4rem; margin: 8px 0 16px; }
+  h3 { margin: 0 0 12px; }
+  .grid { display: grid; gap: 12px; }
+  .item {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 14px 16px; background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+  }
+  .item .name { font-weight: 600; word-break: break-word; }
+  .item small { color: var(--muted); display: block; }
+  .actions { display: flex; gap: 8px; flex-shrink: 0; }
+  .empty { color: var(--muted); padding: 24px 0; }
+
+  .panel { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 18px; margin-bottom: 20px; }
+  input[type=text], input[type=email], input[type=password] {
+    width: 100%; padding: 11px 12px; border-radius: 8px; border: 1.5px solid var(--line);
+    background: var(--bg); color: var(--text); font: inherit; margin-bottom: 10px;
+  }
+  input[type=file] { width: 100%; margin-bottom: 10px; color: var(--text); }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .stat { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 12px; text-align: center; }
+  .stat b { display: block; font-size: 1.8rem; color: var(--accent); line-height: 1.1; }
+  .stat span { color: var(--muted); font-size: .85rem; }
+  .row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .row input { margin: 0; }
+  .row small { color: var(--muted); white-space: nowrap; }
+  .msg { min-height: 1.2em; font-size: .92rem; margin: 6px 0 0; }
+  .msg.ok { color: var(--accent); } .msg.err { color: var(--danger); }
+  .bar { height: 8px; background: var(--line); border-radius: 6px; overflow: hidden; margin-top: 8px; display: none; }
+  .bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .2s; }
+  .hidden { display: none !important; }
+  @media (max-width: 520px) {
+    .item { flex-direction: column; align-items: stretch; }
+    .actions .btn, .actions button { flex: 1; text-align: center; }
+    .stats { grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<header>
+  <button id="adminBtn" class="ghost">Admin</button>
+  <h1>PDF Library</h1>
+  <button id="themeBtn" aria-label="Toggle light and dark mode">🌙</button>
+</header>
+
+<!-- HOME VIEW -->
+<section id="homeView">
+  <div class="hero" id="hero"><span>No banner image yet</span></div>
+  <main>
+    <h2>Download PDFs</h2>
+    <div id="pdfList" class="grid"><p class="empty">Loading…</p></div>
+  </main>
+</section>
+
+<!-- ADMIN VIEW -->
+<section id="adminView" class="hidden">
+  <main>
+    <!-- Login -->
+    <div id="loginBox" class="panel hidden">
+      <h3>Admin login</h3>
+      <input type="email" id="email" placeholder="Email" autocomplete="username">
+      <input type="password" id="password" placeholder="Password" autocomplete="current-password">
+      <button id="loginBtn">Log in</button>
+      <p class="msg" id="loginMsg"></p>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dash" class="hidden">
+      <div class="panel">
+        <h3>Unique visitors</h3>
+        <div class="stats">
+          <div class="stat"><b id="sDay">0</b><span>Today</span></div>
+          <div class="stat"><b id="sWeek">0</b><span>This week</span></div>
+          <div class="stat"><b id="sMonth">0</b><span>This month</span></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Top banner image</h3>
+        <input type="file" id="heroFile" accept="image/*">
+        <button id="heroBtn">Upload banner</button>
+        <p class="msg" id="heroMsg"></p>
+      </div>
+
+      <div class="panel">
+        <h3>Add PDFs</h3>
+        <input type="file" id="pdfFiles" accept="application/pdf" multiple>
+        <div id="nameRows"></div>
+        <button id="pdfBtn" disabled>Upload PDFs</button>
+        <div class="bar" id="bar"><i></i></div>
+        <p class="msg" id="pdfMsg"></p>
+      </div>
+
+      <div class="panel">
+        <h3>Your PDFs</h3>
+        <div id="adminPdfList" class="grid"></div>
+      </div>
+
+      <button id="logoutBtn" class="ghost">Log out</button>
+    </div>
+  </main>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ========= 1. CONFIG: paste your own values ========= */
+const SUPABASE_URL = "https://bfgvmoeelyrdqjiexslb.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJmZ3Ztb2VlbHlyZHFqaWV4c2xiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg4MTE0OTAsImV4cCI6MjEwNDM4NzQ5MH0.VxvEPa6t7TWpCwCdFgZe_-EZcAF_812MSMj9qlozDls";
+/* ==================================================== */
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const $ = (s) => document.querySelector(s);
+const esc = (t) => String(t).replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const say = (el, text, type = "") => { el.textContent = text; el.className = "msg " + type; };
+
+/* ========= 2. THEME ========= */
+function applyTheme(t) {
+  document.documentElement.setAttribute("data-theme", t);
+  $("#themeBtn").textContent = t === "dark" ? "☀️" : "🌙";
+  try { localStorage.setItem("theme", t); } catch (e) {}
+}
+(function initTheme() {
+  let saved = null;
+  try { saved = localStorage.getItem("theme"); } catch (e) {}
+  applyTheme(saved || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
+})();
+$("#themeBtn").onclick = () =>
+  applyTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark");
+
+/* ========= 3. VISITOR COUNTER (unique per person per day) ========= */
+function getVisitorId() {
+  const m = document.cookie.match(/(?:^|; )vid=([^;]+)/);
+  let id = null;
+  try { id = localStorage.getItem("vid"); } catch (e) {}
+  id = id || (m && m[1]);
+  if (!id) id = (crypto.randomUUID ? crypto.randomUUID() : Date.now() + "-" + Math.random().toString(36).slice(2));
+  try { localStorage.setItem("vid", id); } catch (e) {}
+  document.cookie = "vid=" + id + "; max-age=63072000; path=/; SameSite=Lax";
+  return id;
+}
+async function logVisit() {
+  // The database ignores repeats: one row per visitor per day.
+  try { await sb.rpc("log_visit", { vid: getVisitorId() }); } catch (e) {}
+}
+
+/* ========= 4. PUBLIC PAGE ========= */
+async function loadHero() {
+  const { data } = await sb.from("site_settings").select("hero_url").eq("id", 1).maybeSingle();
+  const box = $("#hero");
+  if (data && data.hero_url) box.innerHTML = `<img src="${esc(data.hero_url)}" alt="Banner">`;
+  else box.innerHTML = "<span>No banner image yet</span>";
+}
+async function fetchPdfs() {
+  const { data, error } = await sb.from("pdfs").select("*").order("created_at", { ascending: false });
+  return error ? [] : data;
+}
+function downloadUrl(p) {
+  return sb.storage.from("pdfs").getPublicUrl(p.file_path, { download: p.name + ".pdf" }).data.publicUrl;
+}
+async function loadPdfs() {
+  const list = await fetchPdfs();
+  $("#pdfList").innerHTML = list.length
+    ? list.map((p) => `
+      <div class="item">
+        <div class="name">${esc(p.name)}<small>${new Date(p.created_at).toLocaleDateString()}</small></div>
+        <div class="actions"><a class="btn" href="${esc(downloadUrl(p))}">Download</a></div>
+      </div>`).join("")
+    : `<p class="empty">No PDFs available yet.</p>`;
+}
+
+/* ========= 5. ADMIN ========= */
+async function isAdmin() {
+  const { data } = await sb.rpc("is_admin");
+  return data === true;
+}
+async function showAdmin() {
+  const { data: { session } } = await sb.auth.getSession();
+  $("#loginBox").classList.add("hidden");
+  $("#dash").classList.add("hidden");
+  if (!session) { $("#loginBox").classList.remove("hidden"); return; }
+  if (!(await isAdmin())) {
+    await sb.auth.signOut();
+    $("#loginBox").classList.remove("hidden");
+    say($("#loginMsg"), "This account is not an admin.", "err");
+    return;
+  }
+  $("#dash").classList.remove("hidden");
+  loadStats();
+  loadAdminPdfs();
+}
+$("#loginBtn").onclick = async () => {
+  const btn = $("#loginBtn"); btn.disabled = true;
+  say($("#loginMsg"), "Logging in…");
+  const { error } = await sb.auth.signInWithPassword({ email: $("#email").value.trim(), password: $("#password").value });
+  btn.disabled = false;
+  if (error) return say($("#loginMsg"), error.message, "err");
+  say($("#loginMsg"), ""); $("#password").value = "";
+  showAdmin();
+};
+$("#logoutBtn").onclick = async () => { await sb.auth.signOut(); showAdmin(); };
+
+async function loadStats() {
+  const { data, error } = await sb.rpc("visit_stats");
+  if (error || !data) return;
+  $("#sDay").textContent = data.day;
+  $("#sWeek").textContent = data.week;
+  $("#sMonth").textContent = data.month;
+}
+
+/* Banner upload */
+$("#heroBtn").onclick = async () => {
+  const file = $("#heroFile").files[0];
+  if (!file) return say($("#heroMsg"), "Choose an image first.", "err");
+  $("#heroBtn").disabled = true; say($("#heroMsg"), "Uploading…");
+  const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+  const path = `hero-${Date.now()}.${ext}`;
+  const { error } = await sb.storage.from("site-assets").upload(path, file, { contentType: file.type });
+  if (error) { $("#heroBtn").disabled = false; return say($("#heroMsg"), error.message, "err"); }
+  const url = sb.storage.from("site-assets").getPublicUrl(path).data.publicUrl;
+  const { data: old } = await sb.from("site_settings").select("hero_path").eq("id", 1).maybeSingle();
+  const { error: e2 } = await sb.from("site_settings").update({ hero_url: url, hero_path: path }).eq("id", 1);
+  if (!e2 && old && old.hero_path) await sb.storage.from("site-assets").remove([old.hero_path]);
+  $("#heroBtn").disabled = false;
+  if (e2) return say($("#heroMsg"), e2.message, "err");
+  say($("#heroMsg"), "Banner updated.", "ok");
+  $("#heroFile").value = "";
+  loadHero();
+};
+
+/* PDF upload: choose files, name each one, upload */
+$("#pdfFiles").onchange = () => {
+  const files = [...$("#pdfFiles").files];
+  $("#nameRows").innerHTML = files.map((f, i) => `
+    <div class="row">
+      <input type="text" data-i="${i}" value="${esc(f.name.replace(/\.pdf$/i, ""))}" placeholder="Name for this PDF">
+      <small>${(f.size / 1048576).toFixed(1)} MB</small>
+    </div>`).join("");
+  $("#pdfBtn").disabled = files.length === 0;
+  say($("#pdfMsg"), "");
+};
+$("#pdfBtn").onclick = async () => {
+  const files = [...$("#pdfFiles").files];
+  const names = [...document.querySelectorAll("#nameRows input")].map((i) => i.value.trim());
+  if (names.some((n) => !n)) return say($("#pdfMsg"), "Give every PDF a name.", "err");
+  $("#pdfBtn").disabled = true;
+  const bar = $("#bar"), fill = bar.querySelector("i");
+  bar.style.display = "block"; fill.style.width = "0";
+  let done = 0, failed = 0;
+  for (let i = 0; i < files.length; i++) {
+    say($("#pdfMsg"), `Uploading ${i + 1} of ${files.length}…`);
+    const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.pdf`;
+    const up = await sb.storage.from("pdfs").upload(path, files[i], { contentType: "application/pdf" });
+    if (up.error) { failed++; continue; }
+    const ins = await sb.from("pdfs").insert({ name: names[i], file_path: path });
+    if (ins.error) { await sb.storage.from("pdfs").remove([path]); failed++; continue; }
+    done++; fill.style.width = Math.round(((i + 1) / files.length) * 100) + "%";
+  }
+  bar.style.display = "none";
+  say($("#pdfMsg"), failed ? `${done} uploaded, ${failed} failed.` : `${done} PDF(s) uploaded.`, failed ? "err" : "ok");
+  $("#pdfFiles").value = ""; $("#nameRows").innerHTML = ""; $("#pdfBtn").disabled = true;
+  loadAdminPdfs();
+};
+
+/* PDF list + delete */
+async function loadAdminPdfs() {
+  const list = await fetchPdfs();
+  $("#adminPdfList").innerHTML = list.length
+    ? list.map((p) => `
+      <div class="item">
+        <div class="name">${esc(p.name)}<small>${new Date(p.created_at).toLocaleDateString()}</small></div>
+        <div class="actions"><button class="danger" data-id="${p.id}" data-path="${esc(p.file_path)}">Delete</button></div>
+      </div>`).join("")
+    : `<p class="empty">No PDFs uploaded yet.</p>`;
+}
+$("#adminPdfList").onclick = async (e) => {
+  const b = e.target.closest("button[data-id]");
+  if (!b || !confirm("Delete this PDF permanently?")) return;
+  b.disabled = true;
+  const rm = await sb.storage.from("pdfs").remove([b.dataset.path]);
+  if (rm.error) { b.disabled = false; return alert(rm.error.message); }
+  const del = await sb.from("pdfs").delete().eq("id", b.dataset.id);
+  if (del.error) { b.disabled = false; return alert(del.error.message); }
+  loadAdminPdfs();
+};
+
+/* ========= 6. SINGLE-PAGE ROUTING ========= */
+$("#adminBtn").onclick = () => { location.hash = location.hash === "#/admin" ? "" : "#/admin"; };
+function route() {
+  const admin = location.hash === "#/admin";
+  $("#homeView").classList.toggle("hidden", admin);
+  $("#adminView").classList.toggle("hidden", !admin);
+  $("#adminBtn").textContent = admin ? "Home" : "Admin";
+  window.scrollTo(0, 0);
+  if (admin) showAdmin(); else { loadHero(); loadPdfs(); }
+}
+window.addEventListener("hashchange", route);
+logVisit();
+route();
+</script>
+</body>
+</html>
