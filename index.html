@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PDF Library</title>
+<title>theOfficialJohnDoe-library</title>
 <style>
   :root {
     --white: #FFFFFF;
@@ -99,6 +99,21 @@
     .stats { grid-template-columns: 1fr; }
   }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  
+    /* Contact form */
+  .contact-form { display: grid; gap: 12px; }
+  .contact-form .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .contact-form label { display: block; font-weight: 600; margin-bottom: 4px; }
+  .contact-form input, .contact-form select, .contact-form textarea {
+    width: 100%; padding: 11px 12px; border-radius: 8px; border: 1.5px solid var(--line);
+    background: var(--bg); color: var(--text); font: inherit;
+  }
+  .contact-form textarea { min-height: 130px; resize: vertical; }
+  .contact-form input:focus-visible, .contact-form select:focus-visible, .contact-form textarea:focus-visible {
+    outline: 3px solid var(--accent); outline-offset: 2px;
+  }
+  @media (max-width: 520px) { .contact-form .two { grid-template-columns: 1fr; } }
+  
 </style>
 </head>
 <body>
@@ -115,6 +130,51 @@
   <main>
     <h2>Download PDFs</h2>
     <div id="pdfList" class="grid"><p class="empty">Loading…</p></div>
+  </main>
+  
+    <main style="padding-top:0">
+    <div class="panel">
+      <h2>Contact me</h2>
+      <form class="contact-form" action="https://formspree.io/f/xkjnwqee" method="POST">
+        <div class="two">
+          <div>
+            <label for="firstName">First name</label>
+            <input type="text" id="firstName" name="first_name" autocomplete="given-name" required>
+          </div>
+          <div>
+            <label for="lastName">Last name</label>
+            <input type="text" id="lastName" name="last_name" autocomplete="family-name" required>
+          </div>
+        </div>
+        
+        <div>
+          <label for="phone">Phone number</label>
+          <input type="tel" id="phone" name="phone" autocomplete="tel" required>
+        </div>
+        
+        <div>
+          <label for="contactEmail">Email address</label>
+          <input type="email" id="contactEmail" name="email" autocomplete="email" required>
+        </div>
+        
+        <div>
+          <label for="contactMsg">Message</label>
+          <textarea id="contactMsg" name="message" required></textarea>
+        </div>
+        
+        <div>
+          <label for="preferred">Preferred means of reaching out</label>
+          <select id="preferred" name="preferred_contact" required>
+            <option value="" disabled selected>Select one</option>
+            <option value="Email">Email</option>
+            <option value="Phone">Phone number</option>
+            <option value="WhatsApp">WhatsApp</option>
+          </select>
+        </div>
+        
+        <button type="submit">Send message</button>
+      </form>
+    </div>
   </main>
 </section>
 
