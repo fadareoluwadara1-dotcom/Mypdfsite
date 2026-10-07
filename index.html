@@ -114,6 +114,25 @@
   }
   @media (max-width: 520px) { .contact-form .two { grid-template-columns: 1fr; } }
   
+  /* Popup circle */
+.popup-wrap {
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: min(70vw, 280px); aspect-ratio: 1; z-index: 100;
+}
+.popup-circle {
+  width: 100%; height: 100%; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  padding: 24px; background: var(--accent); color: var(--accent-text);
+  font-weight: 700; font-size: 1.1rem; text-decoration: none;
+  box-shadow: 0 8px 30px rgba(0,0,0,.35);
+}
+.popup-close {
+  position: absolute; top: 6%; right: 6%;
+  width: 34px; height: 34px; padding: 0; border-radius: 50%;
+  background: #fff; border: 2px solid #E00000; color: #E00000;
+  font-size: 1.4rem; line-height: 1; display: flex;
+  align-items: center; justify-content: center;
+}
 </style>
 </head>
 <body>
@@ -178,6 +197,10 @@
   </main>
 </section>
 
+  <div class="popup-wrap" id="popup">
+    <a href="href="https://wa.me/2349162461130?text=Hello%2C%20I%20need%20help"" class="popup-circle">Send A Message</a>
+    <button class="popup-close" id="popupClose" aria-label="Close">×</button>
+  </div>
 <!-- ADMIN VIEW -->
 <section id="adminView" class="hidden">
   <main>
@@ -409,6 +432,8 @@ $("#adminPdfList").onclick = async (e) => {
   loadAdminPdfs();
 };
 
+/* ========= POPUP ========= */
+$("#popupClose").onclick = () => $("#popup").classList.add("hidden");
 /* ========= 6. SINGLE-PAGE ROUTING ========= */
 $("#adminBtn").onclick = () => { location.hash = location.hash === "#/admin" ? "" : "#/admin"; };
 function route() {
@@ -425,3 +450,4 @@ route();
 </script>
 </body>
 </html>
+
